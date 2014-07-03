@@ -39,6 +39,22 @@
       (with-open [rdr (clojure.java.io/reader "test/outlierdetection/bostonmarathon-2012-results.txt")]
         (let [data (line-seq rdr)]
           (is (= (clojure.string/split-lines (extract-outliers-as-string extractors data))
-                  ["    18861 9:30:16 100.00% of inputs fall within [0:08:51, 8:28:31]"] )))))))
+                  ["    18908 09:30:16 100.00% of inputs fall within [0:08:54, 8:28:21]"] ))))))
+
+  (testing "bin-with-english-words"
+    (let [popular-threshold 95
+          standard-deviations-threshold 3
+          extractors [
+          (outlierdetection.attribute.LengthExtractor. popular-threshold)
+          (outlierdetection.attribute.HasLeadingSpaceExtractor. popular-threshold)
+          (outlierdetection.attribute.HasTrailingSpaceExtractor. popular-threshold)
+          (outlierdetection.attribute.DurationExtractor. standard-deviations-threshold)
+          (outlierdetection.attribute.NumberExtractor. standard-deviations-threshold)
+          (outlierdetection.attribute.NaiveCharacterTypeCompositionExtractor. popular-threshold)
+          (outlierdetection.attribute.CharacterTypeCompositionExtractor. popular-threshold)]]
+      (with-open [rdr (clojure.java.io/reader "test/outlierdetection/english-words-partial.txt")]
+        (let [data (line-seq rdr)]
+          (is (= (clojure.string/split-lines (extract-outliers-as-string extractors data))
+                  [""] )))))))
 
 
