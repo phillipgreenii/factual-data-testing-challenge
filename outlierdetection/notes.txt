@@ -4,7 +4,7 @@ create object that will extract attribute about the string
 simple extractors
 * TODO extract used to check for uniqueness of values
 * length, 
-* pattern(###-##-####)
+* TODO pattern(###-##-####)
 * numeric value, 
 * composition 
 ** numbers
@@ -18,7 +18,7 @@ deeper extractors
 * TODO phone number extractor
 * TODO date time extractor
 * time (duration) extractor
-* TODO address extractor
+* address extractor
 * TODO location extractor 
 ** gps coordinates could be used to know if locations are "near" each other
 
@@ -26,6 +26,5 @@ once attributes have been extracted from each line they can be aggregated to det
 a stretch goal would be to look for patterns of a combination of attributes (this might entail needing to cluster)
 we may need to use a normal curve to determine if the values are expected or not.  If I remember correctly, there are tests for different distributions, so instead of assuming normal, we could test for a couple different distributions
 the output from this step won't be exepected values, but a function that can determine if a string matches the expected values
-
 
 Once the expected values are known, we iterate through the lines again and dump out outliers
