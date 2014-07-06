@@ -372,3 +372,82 @@
           (is (= (id x) 'outlierdetection.attribute/character-type-composition)))))))
 
 
+(deftest UsAddressExtractor-test
+  (testing "UsAddressExtractor"
+    (testing "extract"
+      (testing "should determine if string is a US address"
+        (let [x (outlierdetection.attribute.UsAddressExtractor. 80)]
+          (are [i o] (= (extract x i) o)
+            "3526 HIGH ST SACRAMENTO CA 95838"  (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+            "3526 HIGH ST SACRAMENTO, CA 95838"  (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+            "3526 HIGH ST SACRAMENTO California 95838"  (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+            "3526 HIGH ST SACRAMENTO, California 95838"  (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+            "3526 high st sacramento ca 95838"  (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+            "3526 high st sacramento, ca 95838"  (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+            "3526 CALIFORNIA ST SACRAMENTO CA 95838"  (outlierdetection.attribute.UsAddress. "3526 CALIFORNIA ST" "SACRAMENTO" "CA" "95838")
+            "3526 CALIFORNIA ST SACRAMENTO, CA 95838"  (outlierdetection.attribute.UsAddress. "3526 CALIFORNIA ST" "SACRAMENTO" "CA" "95838")
+            "3526 AVENUE ST SACRAMENTO CA 95838"  (outlierdetection.attribute.UsAddress. "3526 AVENUE ST" "SACRAMENTO" "CA" "95838")
+            "3526 AVENUE ST SACRAMENTO, CA 95838"  (outlierdetection.attribute.UsAddress. "3526 AVENUE ST" "SACRAMENTO" "CA" "95838")
+            "California"  nil
+            "CA"  nil
+            ""  nil
+            "SACRAMENTO"  nil
+            "95838"  nil
+            "3526 HIGH STREET"  nil
+            "304 867 5309" nil)))) 
+
+    (testing "generate-detector"
+      (testing "if consistently addresses, should return nil for address and explaination for other"
+        (let [x (outlierdetection.attribute.UsAddressExtractor. 80)
+              attributes-coll (generate-test-attributes-coll (id x) [(outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+                                                                     (outlierdetection.attribute.UsAddress. "51 OMAHA CT" "SACRAMENTO" "CA" "95823")
+                                                                     (outlierdetection.attribute.UsAddress. "2796 BRANCH ST" "SACRAMENTO" "CA" "95815")
+                                                                     (outlierdetection.attribute.UsAddress. "2805 JANETTE WAY" "SACRAMENTO" "CA" "95815")
+                                                                     (outlierdetection.attribute.UsAddress. "6001 MCMAHON DR" "SACRAMENTO" "CA" "95824")
+                                                                     (outlierdetection.attribute.UsAddress. "5828 PEPPERMILL CT" "SACRAMENTO" "CA" "95841")
+                                                                     (outlierdetection.attribute.UsAddress. "6048 OGDEN NASH WAY" "SACRAMENTO" "CA" "95842")
+                                                                     nil])
+              detector (generate-detector x attributes-coll)]
+          (are [i o] (= (detector (hash-map (id x) i)) o)
+            (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838") nil
+            nil "87.50% of inputs do consist of a US address"
+            )))
+      (testing "if consistently not addresses, should return nil for not address and explaination for address"
+        (let [x (outlierdetection.attribute.UsAddressExtractor. 80)
+              attributes-coll (generate-test-attributes-coll (id x) [nil
+                                                                     nil
+                                                                     nil
+                                                                     nil
+                                                                     nil
+                                                                     (outlierdetection.attribute.UsAddress. "5828 PEPPERMILL CT" "SACRAMENTO" "CA" "95841")
+                                                                     nil
+                                                                     nil])
+              detector (generate-detector x attributes-coll)]
+          (are [i o] (= (detector (hash-map (id x) i)) o)
+            (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838") "87.50% of inputs do not consist of a US address"
+            nil nil
+            )))
+      (testing "if no consistency, should return nil"
+        (let [x (outlierdetection.attribute.UsAddressExtractor. 80)
+              attributes-coll (generate-test-attributes-coll (id x)  [(outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838")
+                                                                     (outlierdetection.attribute.UsAddress.  "51 OMAHA CT" "SACRAMENTO" "CA" "95823")
+                                                                     nil
+                                                                     (outlierdetection.attribute.UsAddress. "2805 JANETTE WAY" "SACRAMENTO" "CA" "95815")
+                                                                     (outlierdetection.attribute.UsAddress. "6001 MCMAHON DR" "SACRAMENTO" "CA" "95824")
+                                                                     nil
+                                                                     (outlierdetection.attribute.UsAddress. "6048 OGDEN NASH WAY" "SACRAMENTO" "CA" "95842")
+                                                                     nil])
+              detector (generate-detector x attributes-coll)]
+          (are [i o] (= (detector (hash-map (id x) i)) o)
+            (outlierdetection.attribute.UsAddress. "3526 HIGH ST" "SACRAMENTO" "CA" "95838") nil
+            nil nil
+            )))) 
+
+    (testing "id"
+      (testing "should return correct id"
+        (let [x (outlierdetection.attribute.UsAddressExtractor. 80)]
+          (is (= (id x) 'outlierdetection.attribute/address-us)))))))
+
+
+
+

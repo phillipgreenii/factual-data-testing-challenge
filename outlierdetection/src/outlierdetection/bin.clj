@@ -16,7 +16,8 @@
           (outlierdetection.attribute.DurationExtractor. standard-deviations-threshold)
           (outlierdetection.attribute.NumberExtractor. standard-deviations-threshold)
           (outlierdetection.attribute.NaiveCharacterTypeCompositionExtractor. popular-threshold)
-          (outlierdetection.attribute.CharacterTypeCompositionExtractor. popular-threshold)]]
+          (outlierdetection.attribute.CharacterTypeCompositionExtractor. popular-threshold)
+          (outlierdetection.attribute.UsAddressExtractor. popular-threshold)]]
 
     (with-open [rdr (clojure.java.io/reader (first args))]
       (let [data (line-seq rdr)]

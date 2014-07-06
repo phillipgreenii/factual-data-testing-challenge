@@ -55,6 +55,24 @@
       (with-open [rdr (clojure.java.io/reader "test/outlierdetection/english-words-partial.txt")]
         (let [data (line-seq rdr)]
           (is (= (clojure.string/split-lines (extract-outliers-as-string extractors data))
-                  [""] )))))))
+                  [""] ))))))
+
+
+  (testing "bin-with-addresses"
+    (let [popular-threshold 95
+          standard-deviations-threshold 3
+          extractors [
+          (outlierdetection.attribute.LengthExtractor. popular-threshold)
+          (outlierdetection.attribute.HasLeadingSpaceExtractor. popular-threshold)
+          (outlierdetection.attribute.HasTrailingSpaceExtractor. popular-threshold)
+          (outlierdetection.attribute.UsAddressExtractor. popular-threshold)
+          (outlierdetection.attribute.CharacterTypeCompositionExtractor. popular-threshold)]]
+      (with-open [rdr (clojure.java.io/reader "test/outlierdetection/addresses.txt")]
+        (let [data (line-seq rdr)]
+          (is (= (clojure.string/split-lines (extract-outliers-as-string extractors data))
+                  ["      310 6306 CONEJO RANCHO MURIETA, CA 95683 99.70% of inputs do consist of a US address" 
+                   "      339 4030 BROADWAY SACRAMENTO, CA 95817 99.70% of inputs do consist of a US address" 
+                   "      748 1813 AVENIDA MARTINA ROSEVILLE, CA 95747 99.70% of inputs do consist of a US address"] ))))))
+)
 
 
