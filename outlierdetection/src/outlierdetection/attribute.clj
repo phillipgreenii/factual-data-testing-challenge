@@ -1,5 +1,7 @@
 (ns outlierdetection.attribute
-  (:require [incanter.stats :as s] ))
+  (:require [incanter.stats :as i] )
+  (:require [clojure.string :as s] ))
+
 
 (defprotocol AttributeExtractor
   "Extracts an Attribute from a String"
@@ -11,8 +13,8 @@
                                                   :or {format-callback #(format "%.2f%% of inputs fall within [%f, %f]" %1 %2 %3 %4)}}]
   (if-let [clean-values (seq (filter (complement nil?) values))]
     (let [n (count clean-values)
-          mean (s/mean clean-values)
-          sd (s/sd clean-values)
+          mean (i/mean clean-values)
+          sd (i/sd clean-values)
           lower-limit (- mean (* standard-deviations-threshold sd))
           upper-limit (+ mean (* standard-deviations-threshold sd))
           inlier? #(<= lower-limit % upper-limit)
@@ -962,25 +964,23 @@
 
 (defrecord UsAddress [street city state zipcode])
 
-(letfn 
-  [(find-last-occurence-index-of [lookup-map coll]
-    (last (keep-indexed #(when (contains? lookup-map %2) %1) coll)))
-   (split-string [s]
-    ((comp #(clojure.string/split % #"\s+") 
-                     clojure.string/upper-case 
-                     #(clojure.string/replace % #"," "")) 
-     s))]
+(defn- find-last-occurrence-index-of [lookup-map coll]
+  (last (keep-indexed #(when (contains? lookup-map %2) %1) coll)))
+
+(defn- split-potential-address-into-parts [s]
+  (-> s (s/replace #"," "") s/upper-case (s/split #"\s+")))
+
 (defn extract-us-address [s] 
-  (let [parts (split-string s)]
-    (when (re-matches #"^\d{5}$" (last parts))
-      (let [state-index (find-last-occurence-index-of state-abbreviation-lookup parts)
-            street-index (find-last-occurence-index-of street-suffix-lookup parts)]
-        (when (and state-index street-index)
-          (UsAddress. 
-            (clojure.string/join " " (take (inc street-index) parts))
-            (clojure.string/join " " (drop (inc street-index) (take state-index parts)))
-            (state-abbreviation-lookup (nth parts state-index))
-            (last parts))))))))
+  (let [parts (split-potential-address-into-parts s)
+        state-index (find-last-occurrence-index-of state-abbreviation-lookup parts)
+        street-index (find-last-occurrence-index-of street-suffix-lookup parts)
+        zip-code (re-matches #"^\d{5}$" (last parts))]
+    (when (and zip-code street-index state-index (< street-index state-index))
+      (UsAddress. 
+        (clojure.string/join " " (take (inc street-index) parts))
+        (clojure.string/join " " (drop (inc street-index) (take state-index parts)))
+        (state-abbreviation-lookup (nth parts state-index))
+        zip-code))))
 
 
 (deftype UsAddressExtractor [popular-threshold]
