@@ -1,6 +1,7 @@
 (ns outlierdetection.attribute
-  (:require [incanter.stats :as i] )
-  (:require [clojure.string :as s] ))
+  (:require [incanter.stats :as i])
+  (:require [clojure.string :as s])
+  (:require [instaparse.core :as insta]) )
 
 
 (defprotocol AttributeExtractor
@@ -41,10 +42,10 @@
 (defn extract-values-by-key [attributes-coll key]
   (map #(get % key) attributes-coll))
 
-(let [remove-leading-colon #(clojure.string/replace % #"^:" "")
-      replace-hyphen-with-space #(clojure.string/replace % #"-" " ")]
+(let [remove-leading-colon #(s/replace % #"^:" "")
+      replace-hyphen-with-space #(s/replace % #"-" " ")]
   (defn- format-symbols [symbols]
-    (clojure.string/join ", "
+    (s/join ", "
       (map  (fn [s]
               (-> s str 
                     remove-leading-colon
@@ -977,8 +978,8 @@
         zip-code (re-matches #"^\d{5}$" (last parts))]
     (when (and zip-code street-index state-index (< street-index state-index))
       (UsAddress. 
-        (clojure.string/join " " (take (inc street-index) parts))
-        (clojure.string/join " " (drop (inc street-index) (take state-index parts)))
+        (s/join " " (take (inc street-index) parts))
+        (s/join " " (drop (inc street-index) (take state-index parts)))
         (state-abbreviation-lookup (nth parts state-index))
         zip-code))))
 
@@ -989,6 +990,65 @@
     (symbol "outlierdetection.attribute" "address-us"))
   (extract [this string]
     (extract-us-address string))
+  (generate-detector [this attributes-coll]
+    (let [usaddress? (partial instance? UsAddress)
+          outlier-detector 
+          (build-discrete-outlier-detector 
+            popular-threshold
+            (map usaddress? (extract-values-by-key attributes-coll (id this)))
+            :format-callback (fn [popular-percentage value-popular _]
+                              (format "%.2f%% of inputs %s consist of a US address" popular-percentage (if value-popular "do" "do not"))))
+          value-extractor (id this)]
+      (comp outlier-detector usaddress? value-extractor))))
+
+
+(def ^:private parse-us-address-into-tree
+  (letfn [(combine-strings-to-pattern [strings]
+            (s/join " | " (map (partial format "'%s'") strings)))]
+    (insta/parser
+      (format 
+      "<address>      = street-address <ows> city <ows> state <ows> zip
+       street-address = word+ suffix
+       city           = word+
+       word           = #'\\w+' | #'\\w+' <ows>    
+       suffix         = %s
+       state          = %s
+       zip            = #'\\d{5}'
+       ows            = #'[\\s,]+'"
+        (combine-strings-to-pattern (keys street-suffix-lookup))
+        (combine-strings-to-pattern (keys state-abbreviation-lookup))))))
+
+
+(defn- combine-words [parse-words]
+  (s/join " " 
+          (map (comp s/trim second) parse-words)))
+
+(defn- extract-address-from-parse-tree [parse-tree]
+  (let [[street-address-parts city-parts state-parts zip-code-parts] (map rest parse-tree)
+        street-address-suffix (get street-suffix-lookup (second (last street-address-parts)))
+        street-address-root (combine-words (butlast street-address-parts))
+        street-address (s/join " " (list street-address-root street-address-suffix))
+        city (combine-words city-parts)
+        state (get state-abbreviation-lookup (first state-parts))
+        zip-code (first zip-code-parts)]
+      (UsAddress. 
+        street-address
+        city
+        state
+        zip-code)))
+
+(defn parse-us-address [s]
+  (let [parse-tree (parse-us-address-into-tree (s/upper-case s))]
+    (when-not (insta/failure? parse-tree)
+      (extract-address-from-parse-tree parse-tree))))
+
+
+(deftype ParsingUsAddressExtractor [popular-threshold]
+  AttributeExtractor
+  (id [this] 
+    (symbol "outlierdetection.attribute" "address-us-parsed"))
+  (extract [this string]
+    (parse-us-address string))
   (generate-detector [this attributes-coll]
     (let [usaddress? (partial instance? UsAddress)
           outlier-detector 
