@@ -1,0 +1,6 @@
+id	street address	city	region	postal code
+1	123 First Street	Los Angeles	California	90025
+2	123 First St.	West Los Angeles	CA	90025
+3	123 First Street	Paris	Texas	75462
+4	123 First Street	Paris	France	75008
+5	123 1er Street	Paris	France	75008

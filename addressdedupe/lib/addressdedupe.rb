@@ -1,0 +1,7 @@
+require "addressdedupe/db_country_mapping"
+require "addressdedupe/db_state_mapping"
+require "addressdedupe/db_street_suffix_mapping"
+require "addressdedupe/db_zip_code_database"
+require "addressdedupe/canonicalizer"
+require "addressdedupe/deduper"
+require "addressdedupe/version"

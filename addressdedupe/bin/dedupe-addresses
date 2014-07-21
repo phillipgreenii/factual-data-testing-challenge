@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require 'addressdedupe'
+
+raise "You must specify input file name" if ARGV.empty?
+
+deduper = Addressdedupe::Deduper.new
+puts deduper.dedupe_from(ARGV[0]).join("\n")
