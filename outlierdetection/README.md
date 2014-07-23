@@ -6,16 +6,9 @@ This is my implementation to Problem 1: Outlier Detection found at [Data Testing
 
 Download from [https://github.com/phillipgreenii/factual-data-testing-challenge].
 
-    $ gem build addressdedupe.gemspec 
-    $ gem install addressdedupe
-
 ## Usage
 
-    $  dedupe-addresses input_file_name
-
-### Input file format
-
-The input file must be a tab delimited file with the following column headers: 'street address', 'city', 'region', 'postal code'.
+    $ lein run input_file_name
 
 ## Options
 

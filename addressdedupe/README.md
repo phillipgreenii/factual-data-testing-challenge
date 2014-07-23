@@ -6,9 +6,16 @@ This is my implementation to Problem 2: Dedupe found at [Data Testing Challenge]
 
 Download from [https://github.com/phillipgreenii/factual-data-testing-challenge].
 
+    $ gem build addressdedupe.gemspec 
+    $ gem install addressdedupe
+
 ## Usage
 
-    $ lein run input_file_name
+    $  dedupe-addresses input_file_name
+
+### Input file format
+
+The input file must be a tab delimited file with the following column headers: 'street address', 'city', 'region', 'postal code'.
 
 ## Options
 
