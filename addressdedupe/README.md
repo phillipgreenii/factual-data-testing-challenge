@@ -15,7 +15,11 @@ Download from [https://github.com/phillipgreenii/factual-data-testing-challenge]
 
 ### Input file format
 
-The input file must be a tab delimited file with the following column headers: 'street address', 'city', 'region', 'postal code'.
+The input file must be a tab delimited file with the following column headers: 'id', 'street address', 'city', 'region', 'postal code'.
+
+### Output
+
+Each line of the output represents a duplicate address found.  The first value of the output pair is the ID of the source address and the secoond is the ID of the duplicate.
 
 ## Options
 

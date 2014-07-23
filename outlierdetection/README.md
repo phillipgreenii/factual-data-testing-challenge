@@ -10,6 +10,14 @@ Download from [https://github.com/phillipgreenii/factual-data-testing-challenge]
 
     $ lein run input_file_name
 
+### Input file format
+
+The input file must be a text file.
+
+### Output
+
+Each line of the output represents a potential outlier.
+
 ## Options
 
 None
