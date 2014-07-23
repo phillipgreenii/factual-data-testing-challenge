@@ -2,14 +2,21 @@
 
 This is my implementation to Problem 2: Dedupe found at [Data Testing Challenge](http://devblog.factual.com/data-testing-challenge)
 
+## Installation
+
+Download from [https://github.com/phillipgreenii/factual-data-testing-challenge].
+
 ## Usage
 
-TODO: Write usage instructions here
+    $ lein run input_file_name
 
-## Contributing
+## Options
 
-1. Fork it ( https://github.com/phillipgreenii/addressdedupe/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+None
+
+## License
+
+Copyright © 2014 Phillip Green II
+
+Distributed under the Eclipse Public License either version 1.0 or (at
+your option) any later version.
