@@ -6,8 +6,7 @@ This is my implementation to Problem 2: Dedupe found at [Data Testing Challenge]
 
 Download from [https://github.com/phillipgreenii/factual-data-testing-challenge].
 
-    $ gem build addressdedupe.gemspec 
-    $ gem install addressdedupe
+    $ rake build install
 
 ## Usage
 
